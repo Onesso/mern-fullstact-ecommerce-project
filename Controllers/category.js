@@ -9,19 +9,19 @@ export const create = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.json({ err: "name is required" });
+      return res.json({ error: "name is required" });
     }
 
     const excistingCategory = await Category.findOne({ name });
     if (excistingCategory) {
-      return res.json({ erro: "Category already excists" });
+      return res.json({ error: "Category already excists" });
     }
 
     const category = await new Category({ name, slug: slugify(name) }).save();
     return res.json(category);
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json(err);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(error);
   }
 };
 
@@ -33,9 +33,9 @@ export const remove = async (req, res) => {
 
     res.json(removed);
     //
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json({ err });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error });
   }
 };
 
@@ -53,9 +53,9 @@ export const update = async (req, res) => {
       { new: true }
     );
     res.json({ category });
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json(err.message);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(error.message);
   }
 };
 // this will display all the categories
@@ -63,9 +63,9 @@ export const list = async (req, res) => {
   try {
     const listAll = await Category.find({});
     res.json(listAll);
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json({ err });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error });
   }
 };
 
@@ -74,8 +74,8 @@ export const read = async (req, res) => {
   try {
     const category = await Category.findOne({ slug: req.params.slug });
     res.json({ category });
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json({ err });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error });
   }
 };
