@@ -52,7 +52,7 @@ export const update = async (req, res) => {
       },
       { new: true }
     );
-    res.json({ category });
+    res.json( category );
   } catch (error) {
     console.log(error);
     return res.status(400).json(error.message);
