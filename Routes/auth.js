@@ -10,6 +10,10 @@ import { isAdmin, requireSignin } from "../middleware/auth.js";
 import { register } from "../Controllers/auth.js";
 import { login } from "../Controllers/auth.js";
 import { secret } from "../Controllers/auth.js";
+import { updateProfile } from "../Controllers/auth.js";
+import { getOrders } from "../Controllers/auth.js";
+import { getAllOrders } from "../Controllers/auth.js";
+
 
 //this is a register route with a router function
 router.post("/register", register);
@@ -19,17 +23,23 @@ router.post("/login", login);
 //this is going to be used in the client side to see if the  as a verification to a particular route
 //the call back function can be put in a controller function but since it is simple can be wrriten here
 
-router.get("/auth-check",requireSignin, (req, res)=>{
-    res.json({ok: true})
-})
-router.get("/admin-check",requireSignin, isAdmin, (req, res)=>{
-    res.json({ok: true})
-})
+router.get("/auth-check", requireSignin, (req, res) => {
+  res.json({ ok: true });
+});
+router.get("/admin-check", requireSignin, isAdmin, (req, res) => {
+  res.json({ ok: true });
+});
 
-
+router.put("/profile", requireSignin, updateProfile);
 
 //testing
 router.get("/secret", requireSignin, isAdmin, secret); // now this means that this route is only available for loged in users this is by adding the middleware
 //"requireSignin"
+
+//orders
+router.get("/orders", requireSignin, getOrders);
+
+router.get("/all-orders", requireSignin, isAdmin, getAllOrders);
+
 
 export default router;

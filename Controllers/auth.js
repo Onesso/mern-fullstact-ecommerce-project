@@ -1,14 +1,3 @@
-//in here we have save the data to mongo db with performing anything like hashing and cheking if the their exist an email which is the same
-// import User from "../modules/user.js";
-// export const register = async (req, res) => {
-//   try {
-//     const user = await new User(req.body).save();
-//     res.json(user);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 /**
  * thing to fix befoare saving user to the db
  * add validation
@@ -20,6 +9,7 @@ import User from "../modules/user.js";
 import { hashpassword, comparePassword } from "../helpers/auth.js";
 import jwt from "jsonwebtoken";
 export const JWT_SECRET = "InY0urDi & bzM0faKas";
+import Order from "../modules/order.js";
 
 //register function
 export const register = async (req, res) => {
@@ -55,8 +45,8 @@ export const register = async (req, res) => {
     // const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     //   expiresIn: "7d",
     // });
-    
-//
+
+    //
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -74,10 +64,6 @@ export const register = async (req, res) => {
     console.log(err);
   }
 };
-
-
-
-
 
 //login function
 export const login = async (req, res) => {
@@ -101,17 +87,9 @@ export const login = async (req, res) => {
 
     //4. compare the password - from the database the hased password is save in the "password catalog"
     const match = await comparePassword(password, user.password);
-    if(!match){
-      return res.json({err: "Wrong password!!"})
+    if (!match) {
+      return res.json({ err: "Wrong password!!" });
     }
-
-   
-    //6. create a signed web token: 1st argument is the user id, 2nd argument is the secret, 3rd expirary date
-    // const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    //   expiresIn: "7d",
-    // });=======> this code didn't work because some how connecting to the env file is not working.
-
-    //
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -129,11 +107,64 @@ export const login = async (req, res) => {
     console.log(err);
   }
 };
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, password, address } = req.body;
+    const user = await User.findById(req.user._id);
 
+    //check password length
+    if (password && password.length < 6) {
+      return res.json({ error: "Password must have 6 characters or more" });
+    }
+    //hash the password
+    const hashedPassword = password ? await hashpassword(password) : undefined;
 
+    //update
+    const updated = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        name: name || req.user.name,
+        password: hashedPassword || req.user.password,
+        address: address || req.user.address,
+      },
+      {
+        new: true,
+      }
+    );
+    updated.password = undefined;
 
-export const secret = async (req, res)=>{
-
-  res.json({curentUser: req.user});
-
+    res.json(updated);
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+export const secret = async (req, res) => {
+  res.json({ curentUser: req.user });
+};
+
+export const getOrders = async (req, res) => {
+  try {
+    //we are getting the ordersbased on the buyers
+    const orders = await Order.find({ buyer: req.user._id })
+      .populate("product", "-photo")
+      .populate("buyer", "name");
+    res.json(orders);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getAllOrders = async(req, res) => {
+  try{
+    const orders = await Order.find({})
+    .populate("buyer", "name")
+    .populate("product", "-photo");
+  res.json(orders);
+  }catch(error){
+    console.log(error);
+  }
+};
+
+
+
